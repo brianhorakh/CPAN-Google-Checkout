@@ -77,6 +77,8 @@ C<Google::Checkout::XML::Constants::GET_SHIPPING> or
 C<Google::Checkout::XML::Constants::GET_BILLING> 
 to get buyer's shipping or billing data respectively. WHICH_DATA can be 
 C<Google::Checkout::XML::Constants::BUYER_CONTACT_NAME>, 
+C<Google::Checkout::XML::Constants::BUYER_STRUCTURED_FIRSTNAME>,
+C<Google::Checkout::XML::Constants::BUYER_STRUCTURED_LASTNAME>,
 C<Google::Checkout::XML::Constants::BUYER_COMPANY_NAME>, 
 C<Google::Checkout::XML::Constants::BUYER_EMAIL>, 
 C<Google::Checkout::XML::Constants::BUYER_PHONE>, 
@@ -87,6 +89,10 @@ C<Google::Checkout::XML::Constants::BUYER_CITY>,
 C<Google::Checkout::XML::Constants::BUYER_REGION>, 
 C<Google::Checkout::XML::Constants::BUYER_POSTAL_CODE>, 
 C<Google::Checkout::XML::Constants::BUYER_COUNTRY_CODE>.
+
+Pass 'undef' for WHICH_DATA if you want a hashref containing all keys/values
+(this might be faster, but is also less safe than using the constants which will be
+preserved in future versions)
 
 =item merchant_calculation_successful
 
@@ -259,18 +265,64 @@ sub get_buyer_info
                         Google::Checkout::XML::Constants::BUYER_SHIPPING : 
                         Google::Checkout::XML::Constants::BUYER_BILLING;
 
-  return Google::Checkout::General::Error->new(
+	##
+	## google screwed up their api and lumped first-name and last-name into "contact-name" for the first release
+	## they then subsequentnly fixed this and introduced "structured-name"	
+	## unfortunately they must have made the poor schelp who wrote the first version fix his/her own mistakes and
+	## instead of doing the smart thing they genuis added a switch in the merchant config! which is stupid - it's XML!
+	## subsequently both versions can be returned and for ISP/hosting companies it means one more thing the merchant
+	## must configure correctly -- the lines below attempt to work around this insanity
+	## by splitting contact-name into structured-named/first-name and structured-name/last-name
+	##
+   my $addr = $self->get_data->{$shipping_billing};
+   if (defined $addr->{'structured-name/first-name'}) {
+      ## we've been here before.
+      }
+   elsif (defined $addr->{'structured-name'}) {
+      ## hurrah, we have structured address info! (whytf is this A SETTING? in the google uI? i'll never know)
+      $addr->{'structured-name/first-name'} = $addr->{'structured-name'}->{'first-name'};
+      $addr->{'structured-name/last-name'} = $addr->{'structured-name'}->{'last-name'};
+      $addr->{'structured-name/emulated'} = 0;
+      delete $addr->{'structured-name'};
+      }
+   else {
+      ## emulate structured name data
+      ## note: we could probably do a better job here with Lingua::EN::NameParse --
+      ## but seems silly to add it as a dependency
+      ($addr->{'structured-name/first-name'},
+       $addr->{'structured-name/last-name'}) = split(/ /,$addr->{'contact-name'},2);
+      $addr->{'structured-name/emulated'} = 1;
+      }
+
+   my $ret = undef;
+   if (not defined $info) {
+      # just return the entire data structure when info is undef.
+      $ret = $addr;
+      }
+   elsif (not Google::Checkout::General::Util::is_valid_buyer_info($info)) {
+      $ret = Google::Checkout::General::Error->new(
            $Google::Checkout::General::Error::ERRORS{INVALID_VALUE}->[0],
-           $Google::Checkout::General::Error::ERRORS{INVALID_VALUE}->[1] . ": $info") 
-    unless is_valid_buyer_info $info;
+           $Google::Checkout::General::Error::ERRORS{INVALID_VALUE}->[1] . ": $info");
+      }
+   else {
+      # all non-nested keys e.g. email, phone, fax, address1, etc.
+      $ret = $addr->{$info};
+      if (ref($ret) eq 'HASH') { $ret = ''; }
+      }
 
-  my $ret = $self->get_data->{$shipping_billing}->{$info};
 
-  if (ref($ret) eq 'HASH') {
-    return '';
-  } else {
-    return $ret;
-  }
+#  return Google::Checkout::General::Error->new(
+#           $Google::Checkout::General::Error::ERRORS{INVALID_VALUE}->[0],
+#           $Google::Checkout::General::Error::ERRORS{INVALID_VALUE}->[1] . ": $info") 
+#    unless is_valid_buyer_info $info;
+#
+#  my $ret = $self->get_data->{$shipping_billing}->{$info};
+#
+#  if (ref($ret) eq 'HASH') {
+#    return '';
+#  } else {
+#    return $ret;
+#  }
 }
 
 sub merchant_calculation_successful

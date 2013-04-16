@@ -113,6 +113,8 @@ use Google::Checkout::XML::Constants;
 my %valid_buyer_info = ( Google::Checkout::XML::Constants::BUYER_CONTACT_NAME , 1, 
                          Google::Checkout::XML::Constants::BUYER_COMPANY_NAME , 1,
                          Google::Checkout::XML::Constants::BUYER_EMAIL        , 1, 
+                         Google::Checkout::XML::Constants::BUYER_STRUCTURED_FIRSTNAME, 1,
+                         Google::Checkout::XML::Constants::BUYER_STRUCTURED_LASTNAME, 1,
                          Google::Checkout::XML::Constants::BUYER_PHONE        , 1,
                          Google::Checkout::XML::Constants::BUYER_FAX          , 1, 
                          Google::Checkout::XML::Constants::BUYER_ADDRESS1     , 1,

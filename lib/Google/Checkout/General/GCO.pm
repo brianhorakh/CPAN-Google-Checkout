@@ -571,7 +571,10 @@ sub _extract_redirect_url
 {
   my ($self, $xml) = @_;
 
-  my $parser = XMLin($xml);
+  # my $parser = XMLin($xml);
+  # new XML::Simple library requires explicit passing of ForceArray
+  my $parser = XMLin($xml,ForceArray=>0,KeyAttr=>[]);
+
 
   my $url = $parser->{Google::Checkout::XML::Constants::REDIRECT_URL}; 
 

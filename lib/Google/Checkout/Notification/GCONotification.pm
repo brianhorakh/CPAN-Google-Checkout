@@ -32,7 +32,8 @@ sub new
 
   my $self = { xml => $args{xml} || '' };
 
-  eval { $self->{data} = XMLin($self->{xml}) if $self->{xml} };
+  # eval { $self->{data} = XMLin($self->{xml}) if $self->{xml} };
+  eval { $self->{data} = XMLin($self->{xml},force_array=>['anonymous-address']) if $self->{xml} };
 
   return Google::Checkout::General::Error->new(-1, "XML Error: $@") if $@;
 
@@ -66,7 +67,8 @@ sub set_xml
     $need_reload = 1;
   }
 
-  eval { $self->{data} = XMLin($self->{xml}) 
+ ## eval { $self->{data} = XMLin($self->{xml}) 
+ eval { $self->{data} = XMLin($self->{xml}, force_array=>['anonymous-address'])
     if ($need_reload && $self->{xml}) };
 
   return $@ ? Google::Checkout::General::Error->new(

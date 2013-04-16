@@ -155,6 +155,8 @@ use constant BUYER_SHIPPING  => "buyer-shipping-address";
 use constant BUYER_BILLING   => "buyer-billing-address";
 use constant BILLING_ADDRESS => "billing-address";
 
+use constant BUYER_STRUCTURED_FIRSTNAME         => "structured-name/first-name";
+use constant BUYER_STRUCTURED_LASTNAME          => "structured-name/last-name";
 use constant BUYER_CONTACT_NAME => "contact-name";
 use constant BUYER_COMPANY_NAME => "company-name";
 use constant BUYER_EMAIL        => "email";

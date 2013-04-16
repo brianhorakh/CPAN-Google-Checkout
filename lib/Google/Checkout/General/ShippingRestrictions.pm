@@ -27,6 +27,19 @@ This module is used to define shipping address-filters or restrictions which can
 be added as part of a shipping method.  Also, TaxTableAreas.pm is also a subclass of 
 this module.
 
+NOTE:
+  This documentation is a just a teaser, you can't actually pass values via ->new()
+  instead you must call the respective methods ex: $restriction->add_allowed_zip("94*");
+  don't worry, that way is better anyway (try it) .. so I didn't bother to fix it.
+
+PERSONAL NOTE:
+  The way google does it's address filtering is messed up, and really backwards.
+  I nominate the person responsible for using the tag "excluded_country_area" and
+  "allowed_country_area" to filter "US states" when there was already a perfectly viable "state"
+  tag, thereby relegating international country support to the "postal_area" tag -- be found,
+  tried in a court of their peers and then publically flogged. I'm sorry but my brain can't
+  possibly make any more sense of this. -BH
+
 =over 4
 
 =item EU_COUNTRIES
@@ -85,6 +98,7 @@ Adds an allowed US country area.
 =item get_allow_us_po_box
 
 Returns true, false, or undefined if this has not been set
+NOTE: Literally pass the value: "true" or "false", not a 1/0
 
 =item add_allow_us_po_box BOOLEAN
 
@@ -104,7 +118,15 @@ Returns the allowed postal area (array reference).
 
 =item add_allowed_postal_area AREA
 
-Add a postal area
+Add a postal area (aka COUNTRY) to the included list.
+The "AREA" should be a hashref in the format:
+ { country_code=>'AU' }, { country_code=>'CA' }
+
+=item add_excluded_postal_area AREA
+
+Adds a postal area (aka COUNTRY) to be excluded.
+The "AREA" should be a hashref in the format:
+ { country_code=>'AU' }, { country_code=>'CA' }
 
 =item get_excluded_state
 
@@ -152,7 +174,8 @@ use Google::Checkout::XML::Constants;
 
 use constant EU_COUNTRIES => ('AT', 'BE', 'BG', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE',
                               'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL',
-                              'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'UK');
+                              'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'GB');  
+										## Google uses ISO GB instead of ISO UK for EU countries.
 
 sub new 
 {
@@ -425,7 +448,8 @@ sub add_excluded_postal_area
   
   if (ref($data) eq 'HASH')
   {
-    push(@{$self->{allowed_postal_area}}, $data);
+    # push(@{$self->{allowed_postal_area}}, $data);
+	 push(@{$self->{excluded_postal_area}}, $data);
   }
   elsif ($data eq Google::Checkout::XML::Constants::EU_COUNTRIES)
   {
