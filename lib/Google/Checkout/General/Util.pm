@@ -180,7 +180,7 @@ sub is_object
 {  
   my ($obj, $name) = @_;
 
-  return (Scalar::Util::reftype($obj, $name));
+  return (Scalar::Util::reftype($obj) eq $name);
 }
 
 #--
