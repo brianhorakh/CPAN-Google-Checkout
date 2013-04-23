@@ -310,6 +310,7 @@ sub get_buyer_info
       if (ref($ret) eq 'HASH') { $ret = ''; }
       }
 
+	return($ret);
 
 #  return Google::Checkout::General::Error->new(
 #           $Google::Checkout::General::Error::ERRORS{INVALID_VALUE}->[0],

@@ -100,7 +100,9 @@ our @EXPORT_OK = qw/is_gco_error compute_hmac_sha1 compute_base64
                     is_gift_certificate_object is_digital_content
                     is_parameterized_url/;
 
-use UNIVERSAL qw/isa/;
+# version 5.12 of perl says we shouldn't call UNIVERSAL::isa since it can't be overridden
+#use UNIVERSAL qw/isa/;
+use Scalar::Util 'reftype';
 
 use Date::Manip;
 use MIME::Base64;
@@ -178,7 +180,7 @@ sub is_object
 {  
   my ($obj, $name) = @_;
 
-  return isa $obj, $name;
+  return (Scalar::Util::reftype($obj, $name));
 }
 
 #--
