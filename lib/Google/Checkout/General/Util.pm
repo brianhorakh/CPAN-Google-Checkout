@@ -180,8 +180,12 @@ sub is_object
 {  
   my ($obj, $name) = @_;
 
-	## return (Scalar::Util::reftype($obj) eq $name);
-	return (ref($obj) eq $name);
+	## return (Scalar::Util::reftype($obj) eq $name);	## FAILS ON INHERITED VALUES
+	if (ref($obj) eq $name) { return(1); }
+	if (ref($obj) eq '') { return(0); }
+	if ($obj->isa( $obj ) eq $name) { return(1); }
+	## DO NOT CALL UNIVERSAL::isa (it's deprecated in perl 5.12)
+	return 0;
 }
 
 #--
