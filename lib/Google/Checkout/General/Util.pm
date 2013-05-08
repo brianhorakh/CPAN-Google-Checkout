@@ -183,7 +183,7 @@ sub is_object
 	## return (Scalar::Util::reftype($obj) eq $name);	## FAILS ON INHERITED VALUES
 	if (ref($obj) eq $name) { return(1); }
 	if (ref($obj) eq '') { return(0); }
-	if ($obj->isa( $obj ) eq $name) { return(1); }
+	if ($obj->isa( $name )) { return(1); }
 	## DO NOT CALL UNIVERSAL::isa (it's deprecated in perl 5.12)
 	return 0;
 }
